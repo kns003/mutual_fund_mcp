@@ -1,0 +1,16 @@
+[project]
+name = "mutual-fund-mcp"
+version = "0.1.0"
+description = "Local analytics MCP server for Indian mutual funds"
+requires-python = ">=3.12"
+dependencies = ["fastmcp>=2.0", "httpx>=0.27", "pydantic>=2.7", "pandas>=2.2", "numpy>=1.26"]
+
+[project.optional-dependencies]
+test = ["pytest>=8", "pytest-asyncio>=0.23", "respx>=0.21"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100

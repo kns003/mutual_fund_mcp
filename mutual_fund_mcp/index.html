@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101723">
+  <meta name="description" content="Explore Indian mutual fund NAV history and transparent portfolio analytics with the Mutual Fund Analytics MCP server.">
+  <title>Indian Mutual Fund MCP — Exact NAV history, clearer analysis</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f4f2eb;
+      --muted: #a8b1bd;
+      --bg: #101723;
+      --panel: #172231;
+      --line: rgba(255,255,255,.12);
+      --mint: #9ef0c2;
+      --lime: #d8ff78;
+      --coral: #ff947c;
+      --blue: #8fc9ff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.55; }
+    a { color: inherit; }
+    .shell { width: min(1120px, calc(100% - 40px)); margin-inline: auto; }
+    .topbar { height: 76px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; letter-spacing: .02em; }
+    .brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: var(--lime); color: #101723; font-size: 18px; }
+    .top-link { color: var(--muted); text-decoration: none; font-size: 13px; }
+    .top-link:hover, .text-link:hover { color: var(--mint); }
+    .hero { position: relative; overflow: hidden; padding: 94px 0 78px; }
+    .hero::before { content: ""; position: absolute; width: 520px; height: 520px; right: -100px; top: -160px; background: radial-gradient(circle, rgba(158,240,194,.16), rgba(158,240,194,0) 68%); pointer-events: none; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 9px; padding: 7px 11px; border: 1px solid rgba(158,240,194,.28); border-radius: 999px; color: var(--mint); font-size: 11px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 12px var(--mint); }
+    h1 { max-width: 790px; margin: 25px 0 18px; font-size: clamp(43px, 7.4vw, 82px); line-height: .99; letter-spacing: -.065em; font-weight: 760; }
+    h1 span { color: var(--lime); }
+    .hero-copy { max-width: 660px; color: #c0c7d0; font-size: clamp(16px, 2vw, 19px); }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 30px; }
+    .button { min-height: 47px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 0 17px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 750; transition: transform .18s ease, background .18s ease; }
+    .button:hover { transform: translateY(-2px); }
+    .button-primary { background: var(--lime); color: #151d13; }
+    .button-secondary { border: 1px solid var(--line); color: var(--ink); }
+    .endpoint { display: flex; align-items: center; gap: 10px; max-width: 640px; margin-top: 30px; padding: 10px 11px 10px 15px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.035); }
+    .endpoint-label { color: var(--muted); font-size: 11px; white-space: nowrap; }
+    .endpoint code { flex: 1; overflow: hidden; color: #e7f5ee; font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; text-overflow: ellipsis; white-space: nowrap; }
+    .copy { border: 0; border-radius: 7px; background: rgba(255,255,255,.1); color: white; padding: 7px 9px; cursor: pointer; font: inherit; font-size: 11px; }
+    .copy:hover { background: rgba(255,255,255,.18); }
+    .ticker { display: flex; justify-content: space-between; gap: 16px; margin-top: 62px; padding: 19px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    .ticker strong { color: var(--ink); font-weight: 650; }
+    section { padding: 78px 0; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 30px; margin-bottom: 30px; }
+    .kicker { color: var(--coral); font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    h2 { margin: 9px 0 0; font-size: clamp(30px, 4.3vw, 48px); line-height: 1.05; letter-spacing: -.045em; }
+    .section-intro { max-width: 450px; color: var(--muted); font-size: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
+    .card { min-height: 205px; padding: 22px; border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018)); }
+    .card-icon { display: grid; place-items: center; width: 38px; height: 38px; margin-bottom: 26px; border-radius: 11px; background: rgba(216,255,120,.12); color: var(--lime); font-size: 17px; }
+    .card h3 { margin: 0 0 8px; font-size: 16px; }
+    .card p { margin: 0; color: var(--muted); font-size: 12px; }
+    .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+    .details-grid > .details-card:only-child { grid-column: 1 / -1; }
+    .details-card { padding: 23px; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.025); }
+    .details-card h3 { margin: 0 0 15px; font-size: 16px; }
+    .fund-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .fund-tag { padding: 8px 11px; border: 1px solid rgba(158,240,194,.2); border-radius: 999px; color: #d7e6dc; background: rgba(158,240,194,.055); font-size: 11px; }
+    .details-note { margin: 14px 0 0; color: var(--muted); font-size: 12px; }
+    .query-list { display: grid; gap: 9px; }
+    .query { margin: 0; padding: 12px 14px; border-left: 2px solid var(--lime); border-radius: 0 9px 9px 0; background: rgba(216,255,120,.055); color: #e5ebdf; font-size: 12px; }
+    .advanced-card { margin-top: 14px; padding: 24px; border: 1px solid rgba(255,148,124,.24); border-radius: 15px; background: linear-gradient(120deg, rgba(255,148,124,.07), rgba(255,255,255,.018)); }
+    .advanced-card h3 { margin: 5px 0 7px; font-size: 18px; }
+    .advanced-card > p { margin: 0 0 14px; color: var(--muted); font-size: 12px; }
+    .advanced-card details { border-top: 1px solid var(--line); padding-top: 13px; }
+    .advanced-card summary { color: var(--lime); cursor: pointer; font-size: 12px; font-weight: 750; }
+    .advanced-prompt { max-width: 850px; padding: 8px 2px 0; color: #d6dce4; font-size: 12px; }
+    .advanced-prompt ol { padding-left: 22px; }
+    .advanced-prompt li { margin: 5px 0; }
+    .advanced-prompt blockquote { margin: 12px 0; padding: 11px 14px; border-left: 2px solid var(--coral); background: rgba(255,255,255,.035); color: #eef0e9; }
+    .advanced-note { color: #98a4b2 !important; font-size: 11px !important; margin: 14px 0 0 !important; }
+    .difference { display: grid; grid-template-columns: .85fr 1.15fr; gap: 45px; align-items: center; padding: 34px; border: 1px solid rgba(143,201,255,.22); border-radius: 20px; background: radial-gradient(circle at 85% 15%, rgba(143,201,255,.12), transparent 38%), #151f2c; }
+    .difference h2 { max-width: 440px; }
+    .difference-copy { color: #c0c7d0; font-size: 14px; }
+    .difference-copy strong { color: var(--ink); }
+    .signal { display: flex; gap: 13px; align-items: flex-start; margin-top: 18px; }
+    .signal-mark { color: var(--mint); font-weight: 900; }
+    .connect { background: #131d29; border-block: 1px solid var(--line); }
+    .connect-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
+    .connect-card { padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.025); }
+    .connect-title { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+    .connect-card h3 { margin: 0; font-size: 16px; }
+    .connect-card p { margin: 9px 0 12px; color: var(--muted); font-size: 12px; }
+    .text-link { color: var(--blue); font-size: 12px; font-weight: 700; text-decoration: none; }
+    .code { overflow: auto; margin: 13px 0 4px; padding: 12px; border-radius: 9px; background: #0d141e; color: #d3e6f7; font: 11px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .note { margin-top: 16px; color: #8996a5; font-size: 11px; }
+    .contact { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 30px; border: 1px solid rgba(255,148,124,.23); border-radius: 18px; background: linear-gradient(110deg, rgba(255,148,124,.10), rgba(255,255,255,.02)); }
+    .contact h2 { font-size: 30px; }
+    .contact p { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+    footer { padding: 24px 0 38px; color: #788494; font-size: 11px; }
+    footer .shell { display: flex; justify-content: space-between; gap: 20px; }
+    @media (max-width: 850px) { .grid, .connect-grid { grid-template-columns: repeat(2, 1fr); } .difference { grid-template-columns: 1fr; gap: 17px; } }
+    @media (max-width: 580px) { .shell { width: min(100% - 28px, 1120px); } .topbar { height: 64px; } .hero { padding: 66px 0 50px; } .ticker { flex-wrap: wrap; margin-top: 42px; } section { padding: 57px 0; } .section-head { display: block; } .grid, .connect-grid, .details-grid { grid-template-columns: 1fr; } .card { min-height: auto; } .card-icon { margin-bottom: 18px; } .difference { padding: 23px; } .contact { align-items: flex-start; flex-direction: column; padding: 23px; } footer .shell { flex-direction: column; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="shell topbar">
+    <a class="brand" href="#top" aria-label="Mutual Fund Analytics home"><span class="brand-mark">↗</span><span>MF ANALYTICS <span style="color:var(--muted);font-weight:500">/ MCP</span></span></a>
+    <a class="top-link" href="#connect">Connect a client <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <main id="top">
+    <div class="shell hero">
+      <div class="eyebrow"><span class="pulse"></span> Indian Mutual Fund MCP</div>
+      <h1>Know the number.<br><span>Know the date.</span></h1>
+      <p class="hero-copy">Analyze Indian mutual funds using natural language. Explore published NAV history and turn dated observations into transparent analytics.</p>
+      <div class="actions">
+        <a class="button button-primary" href="#connect">Connect your AI app <span aria-hidden="true">→</span></a>
+        <a class="button button-secondary" href="#what-it-does">Explore what it does</a>
+      </div>
+      <div class="endpoint" aria-label="MCP endpoint">
+        <span class="endpoint-label">MCP ENDPOINT</span>
+        <code id="endpoint">https://shanka.fastmcp.app/mcp</code>
+        <button class="copy" type="button" id="copyButton" aria-label="Copy MCP endpoint">Copy</button>
+      </div>
+      <div class="ticker"><span><strong>Source</strong> MFAPI.in</span><span><strong>Transport</strong> Streamable HTTP</span><span><strong>Focus</strong> Indian mutual funds</span><span><strong>Analysis</strong> Source-dated</span></div>
+    </div>
+
+    <section class="shell" id="what-it-does">
+      <div class="section-head">
+        <div><div class="kicker">Features</div><h2>Analyze Indian mutual funds using natural language.</h2></div>
+        <p class="section-intro">Use your AI client to look up dated NAV history and calculate transparent performance and risk measures from source observations.</p>
+      </div>
+      <div class="grid">
+        <article class="card"><div class="card-icon">◷</div><h3>Historical NAV lookup</h3><p>Retrieve published NAV values with their exact dates, from the earliest history available for each scheme.</p></article>
+        <article class="card"><div class="card-icon">⌁</div><h3>Rolling returns</h3><p>Review rolling annualized returns over supported 1, 3, 5, and 10-year windows.</p></article>
+        <article class="card"><div class="card-icon">↘</div><h3>Maximum drawdown</h3><p>Find peak-to-trough declines, alongside volatility and other risk measures.</p></article>
+        <article class="card"><div class="card-icon">⇄</div><h3>Fund comparison</h3><p>Compare returns and risk across schemes over a selected date range.</p></article>
+        <article class="card"><div class="card-icon">◌</div><h3>SIP analysis</h3><p>Simulate scheduled investments using the first published NAV on or after each installment date.</p></article>
+        <article class="card"><div class="card-icon">Σ</div><h3>CAGR / XIRR calculations</h3><p>Calculate CAGR for a single investment and XIRR for recorded portfolio cash flows.</p></article>
+      </div>
+      <div class="details-grid">
+        <article class="details-card">
+          <h3>Example queries</h3>
+          <div class="query-list"><p class="query">“Compare HDFC Flexi Cap and Parag Parikh Flexi Cap over the last 10 years.”</p><p class="query">“Give me the 5-year rolling returns of HDFC Flexi Cap.”</p></div>
+        </article>
+      </div>
+      <article class="advanced-card">
+        <div class="kicker">Advanced example · multi-step analysis</div>
+        <h3>Go beyond a single question.</h3>
+        <p>One natural-language request can combine fund discovery, NAV history, comparative performance, risk measures, SIP modelling, and portfolio tools.</p>
+        <details>
+          <summary>Show a complex research and portfolio prompt</summary>
+          <div class="advanced-prompt">
+            <p>Compare Parag Parikh Flexi Cap, SBI Contra, and HDFC Flexi Cap (all Direct, Growth) over the last 10 years. For each fund, give me:</p>
+            <ol>
+              <li>3Y and 5Y rolling return summary (min, median, max)</li>
+              <li>Maximum drawdown, with the peak, trough, and recovery date</li>
+              <li>Sharpe, Sortino, and volatility</li>
+              <li>Calendar-year returns, and how many years each beat the others</li>
+              <li>Result of a ₹10K monthly SIP from Jan 2017, with XIRR</li>
+            </ol>
+            <p>Then rank the funds for (a) a conservative investor and (b) an aggressive investor, with reasoning from the numbers. Finish with one table summarising everything.</p>
+            <p>Add these transactions to my portfolio: ₹50,000 lumpsum in PPFAS Direct on 15 Jan 2021, ₹30,000 lumpsum in SBI Contra Direct on 10 Mar 2022, and ₹40,000 in HDFC Flexi Cap Direct on 5 Aug 2023. Then show my current portfolio value, allocation by fund house, XIRR, and which holding is dragging returns the most.</p>
+          </div>
+        </details>
+        <p class="advanced-note">The MCP calculates and compares historical data; it does not give personalized investment advice. Portfolio transaction examples change saved portfolio data when invoked. Results depend on source history, exact scheme selection, and available dates.</p>
+      </article>
+    </section>
+
+    <section class="shell" aria-labelledby="difference-title">
+      <div class="difference">
+        <div><div class="kicker" style="color:var(--blue)">Why this MCP</div><h2 id="difference-title">Source-dated numbers, transparent calculations.</h2></div>
+        <div class="difference-copy">
+          <p>This MCP connects your AI client to <strong>MFAPI.in</strong> for mutual-fund scheme data and published NAV history. Calculations use the dated observations returned by the source; NAV values are not generated or interpolated.</p>
+          <div class="signal"><span class="signal-mark">✳</span><span>Historical NAVs keep their actual source dates, with available coverage from the earliest records returned for each scheme.</span></div>
+          <div class="signal"><span class="signal-mark">✳</span><span>Results include observation counts, NAV date ranges, cache status, and calculation assumptions for easier review.</span></div>
+          <div class="signal"><span class="signal-mark">✳</span><span>Analytics aid research; they are not investment recommendations. MFAPI does not provide fund holdings, so stock-level overlap is unavailable.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="connect" id="connect">
+      <div class="shell">
+        <div class="section-head">
+          <div><div class="kicker">How to use</div><h2>Add this MCP server to your AI client.</h2></div>
+          <p class="section-intro">Use the remote Streamable HTTP endpoint below. Pick your client, add <a class="text-link" href="https://shanka.fastmcp.app/mcp">https://shanka.fastmcp.app/mcp</a>, and complete Horizon’s sign-in/authorization flow if prompted.</p>
+        </div>
+        <div class="connect-grid">
+          <article class="connect-card"><div class="connect-title"><h3>Horizon</h3><span class="text-link">One-click setup</span></div><p>Open the prefilled Horizon connection page to add this server to your MCP connections.</p><a class="button button-primary" href="https://horizon.prefect.io/connect/eyJuYW1lIjoic2hhbmthIiwidGl0bGUiOiJzaGFua2EiLCJkZXNjcmlwdGlvbiI6IkV4cG9zZXMgbXV0dWFsIGZ1bmQgYW5hbHl0aWNzIGFuZCBOQVYgZGF0YSBmb3IgaW5mb3JtZWQgZGVjaXNpb24tbWFraW5nLiIsImljb24iOiJpY29uOkNoYXJ0TGluZTolMjMzYjgyZjYiLCJyZW1vdGVzIjpbeyJ1cmwiOiJodHRwczovL3NoYW5rYS5mYXN0bWNwLmFwcC9tY3AiLCJ0eXBlIjoiaHR0cCJ9XX0?orgSlug=shanka" target="_blank" rel="noopener noreferrer">Connect with Horizon <span aria-hidden="true">↗</span></a></article>
+          <article class="connect-card"><div class="connect-title"><h3>ChatGPT</h3><span class="text-link">Remote MCP</span></div><p>Create a custom MCP app, enter the server endpoint, scan its tools, then enable it in a chat. Availability and setup permissions depend on your plan and workspace.</p><a class="text-link" href="https://help.openai.com/en/articles/12584461-developer-mode-and-full-mcp-connectors-in-chatgpt" target="_blank" rel="noreferrer">ChatGPT setup guide ↗</a></article>
+          <article class="connect-card"><div class="connect-title"><h3>Claude</h3><span class="text-link">Web · Desktop · Code</span></div><p>Add a custom remote connector in Claude, or register the HTTP endpoint in Claude Code. Follow the authorization prompt if shown.</p><div class="code">claude mcp add --transport http mf-analytics https://shanka.fastmcp.app/mcp</div><a class="text-link" href="https://docs.anthropic.com/en/docs/claude-code/mcp" target="_blank" rel="noreferrer">Claude MCP guide ↗</a></article>
+          <article class="connect-card"><div class="connect-title"><h3>Visual Studio Code</h3><span class="text-link">Copilot chat</span></div><p>Add a remote server in the MCP configuration. For a workspace, use <code>.vscode/mcp.json</code>:</p><pre class="code">{
+  "servers": {
+    "mf-analytics": {
+      "type": "http",
+      "url": "https://shanka.fastmcp.app/mcp"
+    }
+  }
+}</pre><a class="text-link" href="https://code.visualstudio.com/docs/agent-customization/mcp-servers" target="_blank" rel="noreferrer">VS Code setup guide ↗</a></article>
+          <article class="connect-card"><div class="connect-title"><h3>Cursor</h3><span class="text-link">Remote server</span></div><p>Add this URL as a remote Streamable HTTP server from Cursor’s MCP settings or configuration.</p><pre class="code">{
+  "mcpServers": {
+    "mf-analytics": {
+      "url": "https://shanka.fastmcp.app/mcp"
+    }
+  }
+}</pre><a class="text-link" href="https://docs.cursor.com/context/model-context-protocol" target="_blank" rel="noreferrer">Cursor MCP guide ↗</a></article>
+        </div>
+        <p class="note">Other MCP-compatible clients can use the same endpoint. Choose Streamable HTTP / remote MCP, paste the URL above, and authorize if prompted. Client features, account eligibility, and setup menus may vary.</p>
+      </div>
+    </section>
+
+    <section class="shell">
+      <div class="contact">
+        <div><div class="kicker">Built with care for the numbers</div><h2>Questions or feedback?</h2><p>Reach the developer directly.</p></div>
+        <a class="button button-primary" href="mailto:kns003@gmail.com">kns003@gmail.com <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell"><span>Mutual Fund Analytics MCP · Data source: MFAPI.in</span><span>Research support, not investment advice.</span></div></footer>
+  <script>
+    const button = document.getElementById("copyButton");
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(document.getElementById("endpoint").textContent);
+        button.textContent = "Copied";
+        setTimeout(() => { button.textContent = "Copy"; }, 1600);
+      } catch {
+        button.textContent = "Select URL";
+      }
+    });
+  </script>
+</body>
+</html>
